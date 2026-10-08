@@ -1,0 +1,22 @@
+# Виртуальное окружение и зависимости
+.venv/
+venv/
+Lib/
+Scripts/
+
+# IDE (PyCharm)
+.idea/
+*.iml
+
+# Кэш Python и байт-код
+__pycache__/
+*.pyc
+*.pyo
+
+# База данных SQLite (локальная, не для Git)
+db.sqlite3
+*.sqlite3
+
+# Временные и служебные
+.DS_Store
+Thumbs.db

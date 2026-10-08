@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h1>{{ vacancy.title }}</h1>
+
+  <div class="card">
+    <div class="card-body">
+      <p><strong>Компания:</strong>
+        <a href="{% url 'company_detail' pk=vacancy.company.pk %}">{{ vacancy.company.name }}</a>
+      </p>
+
+      <p><strong>Зарплата:</strong>
+        {{ vacancy.salary_min|stringformat:"d" }} ₽ – {{ vacancy.salary_max|stringformat:"d" }} ₽
+      </p>
+
+      <p><strong>Статус:</strong> {{ vacancy.status }}</p>
+
+      <p><strong>Дата публикации:</strong> {{ vacancy.posted_at|date:"M. d, Y" }}</p>
+
+      {% if vacancy.description %}
+        <p><strong>Описание:</strong></p>
+        <p>{{ vacancy.description }}</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <p>
+    <a href="{% url 'vacancy_list' %}" class="btn btn-secondary">← Назад к списку вакансий</a>
+  </p>
+{% endblock %}

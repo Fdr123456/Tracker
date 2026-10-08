@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Список компаний</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; background-color: #f5f5f5; }
+        h1 { color: #333; }
+        table { width: 100%; border-collapse: collapse; background: white; box-shadow: 0 0 5px rgba(0,0,0,0.1); }
+        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background-color: #4CAF50; color: white; }
+        tr:hover { background-color: #f1f1f1; }
+        .btn { display: inline-block; padding: 10px 16px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 4px; margin-bottom: 16px; }
+        .btn:hover { background-color: #45a049; }
+    </style>
+</head>
+<body>
+    <h1>Список компаний</h1>
+
+    <a href="{% url 'company_create' %}" class="btn">Добавить компанию</a>
+
+    {% if companies %}
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Название</th>
+                    <th>Город</th>
+                    <th>Сайт</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for company in companies %}
+                    <tr>
+                        <td>{{ company.id }}</td>
+                        <td>
+                            <a href="{% url 'company_detail' company.pk %}">
+                                {{ company.name }}
+                            </a>
+                        </td>
+                        <td>{{ company.city }}</td>
+                        <td>
+                            {% if company.website %}
+                                <a href="{{ company.website }}" target="_blank" rel="noopener noreferrer">
+                                    {{ company.website }}
+                                </a>
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>Пока нет ни одной компании в базе.</p>
+    {% endif %}
+</body>
+</html>

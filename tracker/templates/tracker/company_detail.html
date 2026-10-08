@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ company.name }}</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; background-color: #f5f5f5; }
+        h1 { color: #333; }
+        .company-card { background: white; padding: 24px; border-radius: 8px; box-shadow: 0 0 5px rgba(0,0,0,0.1); max-width: 600px; }
+        .field-row { margin-bottom: 12px; }
+        .field-label { font-weight: bold; color: #555; }
+        a.btn-back { display: inline-block; margin-top: 16px; color: #4CAF50; text-decoration: none; }
+        a.btn-back:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <h1>{{ company.name }}</h1>
+
+    <div class="company-card">
+        <div class="field-row">
+            <span class="field-label">Город:</span> {{ company.city|default:"—" }}
+        </div>
+        <div class="field-row">
+            <span class="field-label">Сайт:</span>
+            {% if company.website %}
+                <a href="{{ company.website }}" target="_blank" rel="noopener noreferrer">{{ company.website }}</a>
+            {% else %}
+                —
+            {% endif %}
+        </div>
+        {% if company.description %}
+            <div class="field-row">
+                <span class="field-label">Описание:</span>
+                <p>{{ company.description }}</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <a href="{% url 'company_list' %}" class="btn-back">← Назад к списку</a>
+</body></html>

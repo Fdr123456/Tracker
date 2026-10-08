@@ -1,0 +1,41 @@
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<h1>Список вакансий</h1>
+
+<p>
+  <a href="{% url 'vacancy_create' %}" class="btn btn-success">Добавить вакансию</a>
+  <a href="{% url 'company_list' %}" class="btn btn-secondary">← К компаниям</a>
+</p>
+
+<table class="table table-striped">
+  <thead style="background-color: #28a745; color: white;">
+    <tr>
+      <th>Вакансия</th>
+      <th>Компания</th>
+      <th>Зарплата</th>
+      <th>Статус</th>
+      <th>Дата</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for vacancy in vacancies %}
+    <tr>
+      <td>
+        <a href="{% url 'vacancy_detail' pk=vacancy.pk %}">
+          {{ vacancy.title }}
+        </a>
+      </td>
+      <td>
+        <a href="{% url 'company_detail' pk=vacancy.company.pk %}">
+          {{ vacancy.company.name }}
+        </a>
+      </td>
+      <td>
+        {{ vacancy.salary_min|stringformat:"d" }} ₽ – {{ vacancy.salary_max|stringformat:"d" }} ₽
+      </td>
+      <td>{{ vacancy.status }}</td>
+      <td>{{ vacancy.posted_at|date:"M. d, Y" }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
