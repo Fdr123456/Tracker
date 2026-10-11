@@ -16,9 +16,8 @@ class Vacancy(models.Model):
     title = models.CharField(max_length=200)
     salary_min = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     salary_max = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
-    status = models.CharField(max_length=20, default='open')  # open, closed, filled
-    posted_at = models.DateField(auto_now_add=True)  # это как раз про тип Date
-
+    status = models.CharField(max_length=20, default='open')
+    posted_at = models.DateField(auto_now_add=True)
     def __str__(self):
         return f"{self.title} at {self.company.name}"
 
@@ -27,7 +26,7 @@ class Application(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='applications')
     vacancy = models.ForeignKey(Vacancy, on_delete=models.CASCADE, related_name='applications')
     applied_at = models.DateTimeField(auto_now_add=True)
-    status = models.CharField(max_length=20, default='pending')  # pending, rejected, accepted
+    status = models.CharField(max_length=20, default='pending')
     notes = models.TextField(blank=True)
 
     def __str__(self):

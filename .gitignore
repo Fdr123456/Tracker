@@ -1,8 +1,6 @@
-# Виртуальное окружение и зависимости
+# Виртуальное окружение (всё внутри игнорируется)
 .venv/
 venv/
-Lib/
-Scripts/
 
 # IDE (PyCharm)
 .idea/
@@ -13,10 +11,13 @@ __pycache__/
 *.pyc
 *.pyo
 
-# База данных SQLite (локальная, не для Git)
-db.sqlite3
+# Локальные файлы баз данных
 *.sqlite3
+db.sqlite3
 
-# Временные и служебные
+# Временные и служебные файлы ОС
 .DS_Store
 Thumbs.db
+Lib/
+Scripts/
+get-pip.py

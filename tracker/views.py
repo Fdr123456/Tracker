@@ -7,6 +7,7 @@ class CompanyListView(ListView):
     model = Company
     template_name = 'tracker/company_list.html'
     context_object_name = 'companies'
+    ordering = ['id']
 
 class CompanyDetailView(DetailView):
     model = Company
@@ -23,6 +24,7 @@ class VacancyListView(ListView):
     model = Vacancy
     template_name = 'tracker/vacancy_list.html'
     context_object_name = 'vacancies'
+    ordering = ['id']
 
 class VacancyDetailView(DetailView):
     model = Vacancy

@@ -23,7 +23,6 @@
         <table>
             <thead>
                 <tr>
-                    <th>ID</th>
                     <th>Название</th>
                     <th>Город</th>
                     <th>Сайт</th>
@@ -32,7 +31,6 @@
             <tbody>
                 {% for company in companies %}
                     <tr>
-                        <td>{{ company.id }}</td>
                         <td>
                             <a href="{% url 'company_detail' company.pk %}">
                                 {{ company.name }}
