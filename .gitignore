@@ -21,3 +21,8 @@ Thumbs.db
 Lib/
 Scripts/
 get-pip.py
+
+# React и npm
+node_modules/
+dist/
+build/

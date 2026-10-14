@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+
 class Company(models.Model):
     name = models.CharField(max_length=200)
     city = models.CharField(max_length=100, null=True, blank=True)
@@ -21,14 +22,20 @@ class Vacancy(models.Model):
     def __str__(self):
         return f"{self.title} at {self.company.name}"
 
-
 class Application(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='applications')
+    STATUS_CHOICES = [
+        ('applied', 'Откликнулся'),
+        ('call', 'Позвали на созвон'),
+        ('task', 'Дали задание'),
+        ('final', 'Итогвое собеседование'),
+        ('accepted', 'Приняли'),
+        ('rejected', 'Неприняли'),
+    ]
     vacancy = models.ForeignKey(Vacancy, on_delete=models.CASCADE, related_name='applications')
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='applied')
+    notes = models.TextField(blank=True, help_text="Заметки")
     applied_at = models.DateTimeField(auto_now_add=True)
-    status = models.CharField(max_length=20, default='pending')
-    notes = models.TextField(blank=True)
 
     def __str__(self):
-        return f"{self.user.email} applied to {self.vacancy.title}"
-
+        return f"{self.vacancy.title} - {self.get_status_display()}"
