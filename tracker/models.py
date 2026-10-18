@@ -32,9 +32,11 @@ class Application(models.Model):
         ('rejected', 'Неприняли'),
     ]
     vacancy = models.ForeignKey(Vacancy, on_delete=models.CASCADE, related_name='applications')
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='applications')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='applied')
-    notes = models.TextField(blank=True, help_text="Заметки")
+    notes = models.TextField(blank=True, help_text="Заметки", null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     applied_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

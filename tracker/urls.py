@@ -1,6 +1,6 @@
 from django.urls import path
 from django.views.generic.base import RedirectView
-from .views import CompanyListView, VacancyListView, VacancyDetailView, VacancyCreateView
+from .views import CompanyListView, VacancyListView, VacancyDetailView, VacancyCreateView, kanban_data
 from . import views
 
 urlpatterns = [
@@ -15,5 +15,9 @@ urlpatterns = [
     path('vacancy/new/', VacancyCreateView.as_view(), name='vacancy_create'),
 
     path('api/kanban/', views.kanban_data, name='kanban_data'),
+
+    path('api/application/<int:pk>/', views.update_application_status, name='app_update'),
+    path('application/create/', views.create_application, name='create_application'),
+    path('application/<int:pk>/delete/', views.delete_application, name='delete_application'),
 ]
 
