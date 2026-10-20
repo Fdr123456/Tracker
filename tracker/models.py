@@ -38,6 +38,7 @@ class Application(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     applied_at = models.DateTimeField(auto_now_add=True)
+    position = models.PositiveIntegerField(default=0)
 
     def __str__(self):
         return f"{self.vacancy.title} - {self.get_status_display()}"

@@ -6,8 +6,9 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from .models import Company, Vacancy, Application
 from .forms import CompanyForm, VacancyForm
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
 
-# Настройка логгера для этого файла
 logger = logging.getLogger(__name__)
 
 
@@ -52,15 +53,10 @@ class VacancyCreateView(CreateView):
 
 
 def kanban_data(request):
-    """
-    Возвращает данные для канбан-доски в формате JSON.
-    Структура: { "applied": [...], "call": [...], ... }
-    """
     try:
-        # filter(vacancy__isnull=False) защищает от ошибок, если в БД есть заявки без вакансии
         apps = Application.objects.filter(
             vacancy__isnull=False
-        ).select_related('vacancy', 'vacancy__company')
+        ).select_related('vacancy', 'vacancy__company').order_by('status', 'position')
 
         board = {
             'applied': [],
@@ -72,7 +68,6 @@ def kanban_data(request):
         }
 
         for app in apps:
-            # Безопасное получение названий (защита от None)
             vacancy_title = (
                 app.vacancy.title
                 if (app.vacancy and app.vacancy.title)
@@ -85,7 +80,6 @@ def kanban_data(request):
                 else 'Без компании'
             )
 
-            # Гарантируем, что статус попадает в одну из колонок
             status_key = app.status if app.status in board else 'applied'
 
             board[status_key].append({
@@ -93,17 +87,15 @@ def kanban_data(request):
                 'vacancy_title': vacancy_title,
                 'company_name': company_name,
                 'status': status_key,
-                # ISO формат даты безопасен для JSON
                 'applied_at': app.applied_at.isoformat() if app.applied_at else None,
                 'notes': app.notes or '',
+                'position': app.position,
             })
 
         return JsonResponse(board, safe=False)
 
     except Exception as e:
-        # Логируем полную ошибку со стеком вызовов
         logger.error("Ошибка в kanban_data: %s", e, exc_info=True)
-        # Возвращаем нейтральный ответ фронтенду, чтобы он не ломался
         return JsonResponse({'error': 'Внутренняя ошибка сервера'}, status=500)
 
 
@@ -114,12 +106,10 @@ def update_application_status(request, pk):
     except Application.DoesNotExist:
         return JsonResponse({'error': 'Not found'}, status=404)
 
-    # Если запрос DELETE — удаляем и выходим
     if request.method == 'DELETE':
         app.delete()
         return JsonResponse({"status": "success", "message": "Отклик удалён"})
 
-    # Если PATCH — обновляем
     try:
         data = json.loads(request.body)
     except json.JSONDecodeError:
@@ -132,6 +122,11 @@ def update_application_status(request, pk):
     if 'notes' in data:
         raw = data['notes']
         app.notes = raw.strip() if (raw and raw.strip()) else None
+
+    if 'position' in data:
+        pos = data['position']
+        if isinstance(pos, int) and pos >= 0:
+            app.position = pos
 
     app.save()
     return JsonResponse({
@@ -187,3 +182,53 @@ def delete_application(request, pk):
     except Exception as e:
         logger.error("Ошибка в delete_application: %s", e, exc_info=True)
         return JsonResponse({"error": str(e)}, status=500)
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def debug_save(request, pk):
+    try:
+        if not request.body:
+            return JsonResponse({'success': False, 'error': 'Empty request body'}, status=400)
+
+        data = json.loads(request.body)
+        app = Application.objects.get(pk=pk)
+
+        # Заметки
+        if 'notes' in data:
+            raw_notes = data['notes']
+            if raw_notes is None:
+                app.notes = None
+            else:
+                stripped = str(raw_notes).strip()
+                app.notes = stripped if stripped else None
+
+        # Статус
+        if 'status' in data:
+            status_value = data['status']
+            valid_statuses = ['applied', 'call', 'task', 'final', 'accepted', 'rejected']
+            if status_value in valid_statuses:
+                app.status = status_value
+
+        # Позиция
+        if 'position' in data:
+            pos = data['position']
+            if isinstance(pos, int) and pos >= 0:
+                app.position = pos
+
+        app.save()
+
+        return JsonResponse({
+            'success': True,
+            'id': app.id,
+            'status': app.status,
+            'position': app.position,
+            'notes': app.notes
+        })
+
+    except Application.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Not found'}, status=404)
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'error': 'Invalid JSON'}, status=400)
+    except Exception as e:
+        logger.error("Ошибка в debug_save: %s", e, exc_info=True)
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)

@@ -18,6 +18,8 @@ urlpatterns = [
 
     path('api/application/<int:pk>/', views.update_application_status, name='app_update'),
     path('application/create/', views.create_application, name='create_application'),
-    path('application/<int:pk>/delete/', views.delete_application, name='delete_application'),
+
+    path('api/debug/<int:pk>/', views.debug_save, name='debug_save'),
+
 ]
 

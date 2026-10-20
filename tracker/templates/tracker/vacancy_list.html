@@ -154,11 +154,8 @@
         </tbody>
     </table>
 
-    <!-- ========================================================= -->
-    <!-- ВРЕМЕННАЯ ПАНЕЛЬ ДЛЯ ТЕСТА УДАЛЕНИЯ ОТКЛИКОВ (ТЕСТ-ЗОНА) -->
-    <!-- Удали этот блок, когда перенесёшь логику в React-канбан -->
     <div style="margin-top: 50px; padding: 30px; border: 2px dashed #ccc; background: #fff; border-radius: 8px;">
-        <h3>🧪 Тест удаления отклика (для проверки бэкенда)</h3>
+        <h3>Тест удаления отклика (для проверки бэкенда)</h3>
         <p>Введи ID отклика (например, из админки Django) и нажми кнопку. Если всё ок — страница перезагрузится, а запись исчезнет.</p>
 
         <input type="number" id="test-app-id" placeholder="ID отклика (число)" style="padding: 10px; margin-right: 15px; width: 150px; border: 1px solid #ccc; border-radius: 4px;">
@@ -167,17 +164,16 @@
             onclick="handleDeleteTest(document.getElementById('test-app-id').value)"
             style="background: #ff4d4d; color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 4px; font-weight: bold;"
         >
-            🗑️ Удалить отклик
+            Удалить отклик
         </button>
 
         <p style="font-size: 0.9em; color: #666; margin-top: 10px;">
-            ⚠️ Это только для тестирования. В финальном интерфейсе удаление будет на канбан-доске.
+            Это только для тестирования. В финальном интерфейсе удаление будет на канбан-доске.
         </p>
     </div>
     <!-- ========================================================= -->
 
     <script>
-        // --- Функция получения CSRF токена из куки браузера ---
         function getCookie(name) {
             let cookieValue = null;
             if (document.cookie && document.cookie !== '') {
@@ -193,7 +189,6 @@
             return cookieValue;
         }
 
-        // --- Логика отправки отклика (handleApply) ---
         let isSubmitting = false;
 
         async function handleApply(vacancyId) {
@@ -204,7 +199,6 @@
             isSubmitting = true;
 
             try {
-                // ✅ ИСПРАВЛЕНО: относительный путь вместо жёсткого http://127.0.0.1:8000
                 const res = await fetch('/application/create/', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
@@ -217,7 +211,6 @@
                         const data = await res.json();
                         if (data.error) errorMsg = data.error;
                     } catch (e) {
-                        // Если сервер вернул HTML (например, страницу 403), JSON не распарсится — это нормально
                     }
                     throw new Error(errorMsg);
                 }
@@ -225,7 +218,7 @@
                 const data = await res.json();
                 console.log('Успех:', data);
                 alert(`Заявка создана! ID: ${data.id}`);
-                location.reload(); // Перезагружаем, чтобы увидеть изменения
+                location.reload();
 
             } catch (err) {
                 console.error('Ошибка:', err);
@@ -235,8 +228,7 @@
             }
         }
 
-        // --- Логика удаления отклика (handleDeleteTest) ---
-        let isDeleting = false; // Защита от двойного клика
+        let isDeleting = false;
 
         async function handleDeleteTest(appId) {
             // Проверка: если ID не введён
@@ -265,14 +257,13 @@
             }
 
             try {
-                // Используем относительный путь, как в urls.py: application/<int:pk>/delete/
                 const res = await fetch(`/application/${appId}/delete/`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-CSRFToken': csrftoken // <-- ЭТО КРИТИЧЕСКИ ВАЖНО для защиты Django
+                        'X-CSRFToken': csrftoken
                     },
-                    body: JSON.stringify({}) // Тело можно оставить пустым
+                    body: JSON.stringify({})
                 });
 
                 if (!res.ok) {
@@ -281,13 +272,12 @@
                         const data = await res.json();
                         if (data.error) errorMsg = data.error;
                     } catch (e) {
-                        // Если Django вернул HTML-страницу ошибки вместо JSON
                     }
                     throw new Error(errorMsg);
                 }
 
                 alert('Отклик успешно удалён! Страница перезагружается...');
-                location.reload(); // Перезагружаем страницу, чтобы таблица обновилась
+                location.reload();
 
             } catch (err) {
                 console.error('Ошибка удаления:', err);
