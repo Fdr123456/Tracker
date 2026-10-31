@@ -4,10 +4,11 @@ from django.views.generic import ListView, DetailView, CreateView
 from django.urls import reverse_lazy
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.models import User
 from .models import Company, Vacancy, Application
 from .forms import CompanyForm, VacancyForm
-from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_http_methods
+from django.contrib.auth.decorators import login_required
 
 logger = logging.getLogger(__name__)
 
@@ -137,6 +138,7 @@ def update_application_status(request, pk):
     })
 
 
+@csrf_exempt
 @require_http_methods(["POST"])
 def create_application(request):
     try:
@@ -148,8 +150,13 @@ def create_application(request):
 
         vacancy = Vacancy.objects.select_related("company").get(pk=vacancy_id)
 
+        user = User.objects.first()
+        if not user:
+            user = User.objects.create_user(username='test_user', password='test123')
+
         app = Application.objects.create(
             vacancy=vacancy,
+            user=user,
             status="applied",
             notes=None,
         )
@@ -170,8 +177,9 @@ def create_application(request):
         logger.error("Ошибка в create_application: %s", e, exc_info=True)
         return JsonResponse({"error": str(e)}, status=500)
 
-
-@require_http_methods(["DELETE"])
+@login_required
+@csrf_exempt
+@require_http_methods(["POST"])
 def delete_application(request, pk):
     try:
         application = Application.objects.get(id=pk)
@@ -183,6 +191,7 @@ def delete_application(request, pk):
         logger.error("Ошибка в delete_application: %s", e, exc_info=True)
         return JsonResponse({"error": str(e)}, status=500)
 
+
 @csrf_exempt
 @require_http_methods(["POST"])
 def debug_save(request, pk):
@@ -193,7 +202,6 @@ def debug_save(request, pk):
         data = json.loads(request.body)
         app = Application.objects.get(pk=pk)
 
-        # Заметки
         if 'notes' in data:
             raw_notes = data['notes']
             if raw_notes is None:
@@ -202,14 +210,12 @@ def debug_save(request, pk):
                 stripped = str(raw_notes).strip()
                 app.notes = stripped if stripped else None
 
-        # Статус
         if 'status' in data:
             status_value = data['status']
             valid_statuses = ['applied', 'call', 'task', 'final', 'accepted', 'rejected']
             if status_value in valid_statuses:
                 app.status = status_value
 
-        # Позиция
         if 'position' in data:
             pos = data['position']
             if isinstance(pos, int) and pos >= 0:
@@ -232,3 +238,29 @@ def debug_save(request, pk):
     except Exception as e:
         logger.error("Ошибка в debug_save: %s", e, exc_info=True)
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+def api_companies_list(request):
+    try:
+        companies = list(Company.objects.values('id', 'name', 'city', 'website'))
+        return JsonResponse(companies, safe=False)
+    except Exception as e:
+        logger.error(f"Ошибка в api_companies_list: {e}")
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+def api_vacancies_list(request):
+    try:
+        vacancies = list(Vacancy.objects.values(
+            'id',
+            'title',
+            'company__name',
+            'status',
+            'salary_min',
+            'salary_max',
+            'posted_at'
+        ))
+        return JsonResponse(vacancies, safe=False)
+    except Exception as e:
+        logger.error(f"Ошибка в api_vacancies_list: {e}")
+        return JsonResponse({'error': str(e)}, status=500)
