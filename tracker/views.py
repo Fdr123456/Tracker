@@ -264,3 +264,16 @@ def api_vacancies_list(request):
     except Exception as e:
         logger.error(f"Ошибка в api_vacancies_list: {e}")
         return JsonResponse({'error': str(e)}, status=500)
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def debug_delete_app(request, pk):
+    """Тестовый эндпоинт: удаляет отклик без CSRF и авторизации."""
+    try:
+        app = Application.objects.get(id=pk)
+        app.delete()
+        return JsonResponse({"status": "success", "message": "Удалено"})
+    except Application.DoesNotExist:
+        return JsonResponse({"status": "error", "message": "Не найдено"}, status=404)
+    except Exception as e:
+        return JsonResponse({"status": "error", "message": str(e)}, status=500)

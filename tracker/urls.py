@@ -24,6 +24,8 @@ urlpatterns = [
     path('application/create/', views.create_application, name='create_application'),
 
     path('api/debug/<int:pk>/', views.debug_save, name='debug_save'),
+    path('api/debug-delete/<int:pk>/', views.debug_delete_app, name='debug_delete_app'),
+
 
     path('api/vacancies/', views.api_vacancies_list, name='api_vacancies'),
 ]
